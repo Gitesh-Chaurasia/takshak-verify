@@ -1,0 +1,284 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Certificate Verification - Takshak Quiz</title>
+<link rel="icon" type="image/png" href="../favicon.png">
+<style>
+:root {
+  --bg-dark: #070c09;
+  --surface: #0f1912;
+  --neon: #00ff88;
+  --gold: #d4af37;
+  --danger: #ef4444;
+  --border: rgba(255, 255, 255, 0.12);
+}
+* { box-sizing: border-box; margin: 0; padding: 0; }
+
+body {
+  background-color: var(--bg-dark);
+  color: #e2e8f0;
+  font-family: system-ui, 'Segoe UI', Arial, sans-serif;
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 24px 16px;
+}
+
+.verify-card {
+  width: 100%;
+  max-width: 580px;
+  background: var(--surface);
+  border: 1.5px solid var(--border);
+  border-radius: 16px;
+  box-shadow: 0 16px 40px rgba(0, 0, 0, 0.7);
+  overflow: hidden;
+  position: relative;
+}
+
+.verify-card-header {
+  padding: 20px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  border-bottom: 1px solid var(--border);
+  background: rgba(0, 0, 0, 0.25);
+}
+.verify-brand {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-weight: 800;
+  font-size: 14px;
+  color: #fff;
+}
+.verify-brand img { width: 32px; height: 32px; }
+
+.status-badge-box {
+  padding: 24px 20px 18px;
+  text-align: center;
+}
+.status-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 18px;
+  border-radius: 30px;
+  font-size: 14px;
+  font-weight: 800;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+.status-pill.valid {
+  background: rgba(0, 255, 136, 0.18);
+  border: 2px solid var(--neon);
+  color: var(--neon);
+  box-shadow: 0 0 20px rgba(0, 255, 136, 0.3);
+}
+.status-pill.invalid {
+  background: rgba(239, 68, 68, 0.18);
+  border: 2px solid var(--danger);
+  color: #fca5a5;
+  box-shadow: 0 0 20px rgba(239, 68, 68, 0.3);
+}
+
+.recipient-name {
+  font-family: Georgia, serif;
+  font-size: 32px;
+  font-weight: 700;
+  color: #fff;
+  margin: 12px 0 4px;
+}
+.cert-subtitle {
+  color: var(--gold);
+  font-size: 14px;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+
+.verify-details {
+  padding: 16px 24px 24px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+.detail-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 8px 0;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+}
+.detail-row:last-child { border-bottom: none; }
+.detail-label {
+  font-size: 13px;
+  color: #94a3b8;
+  font-weight: 500;
+}
+.detail-val {
+  font-size: 14px;
+  font-weight: 700;
+  color: #f8fafc;
+  font-family: monospace;
+}
+
+.verify-footer {
+  padding: 16px 24px;
+  background: rgba(0, 0, 0, 0.3);
+  border-top: 1px solid var(--border);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+.btn {
+  background: #00ff88;
+  color: #000;
+  font-weight: 700;
+  padding: 8px 16px;
+  border-radius: 8px;
+  border: none;
+  cursor: pointer;
+  font-size: 13px;
+  text-decoration: none;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+.btn:hover { background: #2aff9d; }
+
+.hidden { display: none !important; }
+</style>
+</head>
+<body>
+
+<div class="verify-card" id="card">
+  <div class="verify-card-header">
+    <div class="verify-brand">
+      <img src="../logo.webp" alt="Takshak">
+      <span>TAKSHAK VERIFICATION</span>
+    </div>
+    <div style="font-size:12px;color:#94a3b8">AI &amp; DS Dept &bull; SIT</div>
+  </div>
+
+  <div id="loadingBox" style="padding:40px;text-align:center;color:var(--neon)">
+    Verifying certificate authenticity...
+  </div>
+
+  <!-- VALID STATE -->
+  <div id="validBox" class="hidden">
+    <div class="status-badge-box">
+      <div class="status-pill valid">✓ Valid Certificate</div>
+      <div class="recipient-name" id="valName"></div>
+      <div class="cert-subtitle" id="valTitle"></div>
+    </div>
+
+    <div class="verify-details">
+      <div class="detail-row">
+        <span class="detail-label">University Seat No (USN)</span>
+        <span class="detail-val" id="valUsn"></span>
+      </div>
+      <div class="detail-row">
+        <span class="detail-label">Team Name</span>
+        <span class="detail-val" id="valTeam"></span>
+      </div>
+      <div class="detail-row">
+        <span class="detail-label">Semester</span>
+        <span class="detail-val" id="valSem"></span>
+      </div>
+      <div class="detail-row">
+        <span class="detail-label">Competition Rank</span>
+        <span class="detail-val" id="valRank"></span>
+      </div>
+      <div class="detail-row">
+        <span class="detail-label">Certificate ID</span>
+        <span class="detail-val" id="valId" style="color:var(--neon)"></span>
+      </div>
+      <div class="detail-row">
+        <span class="detail-label">Date Issued</span>
+        <span class="detail-val">4 November 2026</span>
+      </div>
+      <div class="detail-row">
+        <span class="detail-label">Issuer</span>
+        <span class="detail-val" style="font-family:sans-serif">HOD, Dr. Nagaraj P (AI &amp; DS)</span>
+      </div>
+    </div>
+
+    <div class="verify-footer">
+      <span style="font-size:12px;color:#64748b">Verified by Takshak Verification Authority</span>
+      <a class="btn" id="viewFullCertBtn" href="#">View Certificate &rarr;</a>
+    </div>
+  </div>
+
+  <!-- INVALID STATE -->
+  <div id="invalidBox" class="hidden">
+    <div class="status-badge-box">
+      <div class="status-pill invalid">✕ Certificate Not Found / Invalid</div>
+      <div class="recipient-name" style="font-size:24px;color:#f87171;margin-top:16px">Verification Failed</div>
+      <p style="color:#94a3b8;font-size:14px;margin-top:8px;padding:0 20px" id="errMsg">
+        The certificate ID is invalid, was tampered with, or does not exist in the official records.
+      </p>
+    </div>
+
+    <div class="verify-footer" style="justify-content:center">
+      <a class="btn" href="/certificate">Look up by USN &rarr;</a>
+    </div>
+  </div>
+</div>
+
+<script>
+const $ = (s) => document.querySelector(s);
+
+async function verify() {
+  const params = new URLSearchParams(window.location.search);
+  const id = (params.get('id') || '').trim();
+
+  if (!id) {
+    $('#loadingBox').classList.add('hidden');
+    $('#invalidBox').classList.remove('hidden');
+    $('#errMsg').textContent = 'No certificate ID provided in the verification URL.';
+    return;
+  }
+
+  // 1. Try static certificates.json (works on static hosting like GitHub Pages / Netlify)
+  try {
+    const staticRes = await fetch('./certificates.json');
+    if (staticRes.ok) {
+      const certMap = await staticRes.json();
+      if (certMap && certMap[id]) {
+        showValid(certMap[id]);
+        return;
+      }
+    }
+  } catch {}
+
+  // Static only – no live server fallback
+
+  // Failed
+  $('#loadingBox').classList.add('hidden');
+  $('#invalidBox').classList.remove('hidden');
+  $('#errMsg').textContent = `Certificate ID "${id}" could not be verified or has been altered.`;
+}
+
+function showValid(c) {
+  $('#loadingBox').classList.add('hidden');
+  $('#validBox').classList.remove('hidden');
+
+  $('#valName').textContent = c.name;
+  $('#valTitle').textContent = c.subtitle ? `${c.title} (${c.subtitle})` : c.title;
+  $('#valUsn').textContent = c.usnMasked || c.usn;
+  $('#valTeam').textContent = c.team;
+  $('#valSem').textContent = 'Semester ' + c.sem;
+  $('#valRank').textContent = c.rank ? `#${c.rank}` : 'Participant';
+  $('#valId').textContent = c.certId;
+  $('#viewFullCertBtn').style.display='none';
+}
+
+verify();
+</script>
+<div style="margin-top:20px;text-align:center"><a href="../index.html" style="color:#00ff88;font-size:13px">← Back to verification home</a></div>
+</body>
+</html>
